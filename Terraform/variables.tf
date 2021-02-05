@@ -28,24 +28,6 @@ variable "s3_backup_name" {
   default     = "homework-vvs-s3-webpage-backup"
 }
 
-variable "s3_backend_name" {
-  description = "Name of the s3 bucket where tf.state will be stored"
-  type        = string
-  default     = "final.task.vvs"
-}
-
-variable "tf_state_path" {
-  description = "Path inside s3_backend_name where tf.state will be stored"
-  type        = string
-  default     = "tfstate/terraform.tfstate"
-}
-
-variable "s3_backend_region" {
-  description = "AWS region where s3 bucket for tf_state"
-  type        = string
-  default     = "eu-central-1"
-}
-
 ####################################################
 # Variables for keys module
 ####################################################
