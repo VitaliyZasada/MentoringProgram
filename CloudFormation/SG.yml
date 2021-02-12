@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Security Groups for application
+
+Parameters:
+  Prefix:
+    Type: String
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: Create VPC endpoints in this VPC
+
+  VPCCIDR:
+    Type: String
+    Description: VPC CIDR block
+
+Resources:
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Load balancer security group
+      GroupName: !Sub "${Prefix}-load-balancer-sg"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub "${Prefix}-load-balancer-sg"
+
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "${Prefix}-ssh-bastion-sg"
+      VpcId: !Ref VPC
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+      - CidrIp: 92.112.186.106/32
+        FromPort: 22
+        IpProtocol: tcp
+        ToPort: 22
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub "${Prefix}-ssh-bastion-sg"
+
+  WebServersSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "${Prefix}-servers-sg"
+      VpcId: !Ref VPC
+      GroupDescription: Security group for ssh and auto-scaling
+      SecurityGroupIngress:
+      - CidrIp: !Ref VPCCIDR
+        FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+      - CidrIp: !Ref VPCCIDR
+        FromPort: -1
+        IpProtocol: icmp
+        ToPort: -1
+      - CidrIp: !Ref VPCCIDR
+        FromPort: 22
+        IpProtocol: tcp
+        ToPort: 22
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub "${Prefix}-servers-sg"
+
+Outputs:
+  LoadBalancerSecurityGroup:
+    Description: LoadBalancerSecurityGroup
+    Value: !Ref LoadBalancerSecurityGroup
+
+  SSHSecurityGroup:
+    Description: SSHSecurityGroup
+    Value: !Ref SSHSecurityGroup
+  
+  WebServersSecurityGroup:
+    Description: WebServersSecurityGroup
+    Value: !Ref WebServersSecurityGroup

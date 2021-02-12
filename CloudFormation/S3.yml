@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: s3 bucket for backup web-content
+
+Parameters:
+  Prefix:
+    Type: String
+
+  BucketName:
+    Type: String
+    Default: "s3-webpage-backup"
+
+Resources:
+  s3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Prefix}-${BucketName}
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Name
+          Value: !Sub "${Prefix}-s3-backup" 
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+
+Outputs:
+  s3Bucket:
+    Description: S3 Bucket name
+    Value: !Ref s3Bucket

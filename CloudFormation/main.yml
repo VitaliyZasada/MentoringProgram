@@ -1,0 +1,82 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Provisions an auto-scaled EC2 servers with bastion and ALB.
+
+Parameters:
+  Prefix:
+    Type: String
+    Default: "vvs-app"
+
+  KeyName:
+    Type: String
+    Default: "test_key"
+
+  ImageId:
+    Type: String
+    Description: Ubuntu 20.04
+    Default: "ami-0885b1f6bd170450c"
+
+  InstanceType:
+    Type: String  
+    Default: "t2.micro"
+
+  BucketName:
+    Type: String
+    Default: "s3-webpage-backup"
+
+Resources:
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./VPC.yml
+      Parameters:
+        Prefix             : !Ref Prefix
+        VPCCIDR            : 10.0.0.0/16
+        PublicSubnet1CIDR  : 10.0.1.0/24
+        PublicSubnet2CIDR  : 10.0.2.0/24
+        PrivateSubnet1CIDR : 10.0.10.0/24
+        PrivateSubnet2CIDR : 10.0.20.0/24
+
+  SG:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./SG.yml
+      Parameters:
+        Prefix  : !Ref Prefix
+        VPC     : !GetAtt VPC.Outputs.VPC
+        VPCCIDR : !GetAtt VPC.Outputs.PrimaryCidrBlock
+
+  S3:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./S3.yml
+      Parameters:
+        Prefix     : !Ref Prefix
+        BucketName : !Ref BucketName
+
+  IAM:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./IAM.yml
+      Parameters:
+        Prefix : !Ref Prefix
+
+  ASGandALB:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./ASGandALB.yml
+      Parameters:
+        Prefix                    : !Ref Prefix
+        KeyName                   : !Ref KeyName
+        ImageId                   : !Ref ImageId
+        InstanceType              : !Ref InstanceType
+        VPC                       : !GetAtt VPC.Outputs.VPC
+        VPCCIDR                   : !GetAtt VPC.Outputs.PrimaryCidrBlock
+        PublicSubnets             : !GetAtt VPC.Outputs.PublicSubnets
+        PrivateSubnets            : !GetAtt VPC.Outputs.PrivateSubnets
+        S3Bucket                  : !GetAtt S3.Outputs.s3Bucket
+        RootInstanceProfile       : !GetAtt IAM.Outputs.RootInstanceProfile
+        LoadBalancerSecurityGroup : !GetAtt SG.Outputs.LoadBalancerSecurityGroup
+        SSHSecurityGroup          : !GetAtt SG.Outputs.SSHSecurityGroup
+        WebServersSecurityGroup   : !GetAtt SG.Outputs.WebServersSecurityGroup
+

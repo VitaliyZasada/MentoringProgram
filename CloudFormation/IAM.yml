@@ -1,0 +1,40 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: IAM Role for EC2 to write to s3
+
+Parameters:
+  Prefix:
+    Type: String
+
+Resources:
+  S3WritableRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub ${Prefix}-write-to-s3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub arn:aws:s3:::${Prefix}*/*
+
+  RootInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref S3WritableRole
+
+Outputs:
+  RootInstanceProfile:
+    Description: Root Role Name
+    Value: !GetAtt RootInstanceProfile.Arn
