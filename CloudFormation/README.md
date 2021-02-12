@@ -12,7 +12,8 @@ You should have a cron job on the instance which should copy a web site content 
 Please note, that for terraform configuration you should have a remote state with s3 bucket backend (separate from a bucket for web content backups). DynamoDB lock table for a remote state is optional. <br>
 
 For both CF and TF tasks please use separate files, do not put all code in one file. You should split your code in a correct way which will be useful and comfortable.
-![1](![cloudformation](https://user-images.githubusercontent.com/55128761/107796756-e1f3b580-6d62-11eb-9a52-f191eef168b5.png)
+
+![cloudformation](https://user-images.githubusercontent.com/55128761/107796756-e1f3b580-6d62-11eb-9a52-f191eef168b5.png)
 ![Web App Reference Architecture (1)](https://user-images.githubusercontent.com/55128761/106191786-fad16800-61b3-11eb-897a-54ee091b455b.png)
 
 ### How to
@@ -24,3 +25,8 @@ aws cloudformation package --template-file main.yml --s3-bucket <ExistingS3Bucke
 ```bash
 aws cloudformation deploy --template-file /path/to/packaged.yml --stack-name test --capabilities CAPABILITY_NAMED_IAM
 ```
+### After the second command is completed result must be similar to this:
+![stacks](https://user-images.githubusercontent.com/55128761/107799598-495f3480-6d66-11eb-81ae-381c95534baa.jpg)
+
+### Back up web page to the s3 bucket (one minute interval for crone just for example)
+![s3_cf](https://user-images.githubusercontent.com/55128761/107799687-6b58b700-6d66-11eb-993d-55b9a407d34c.jpg)
