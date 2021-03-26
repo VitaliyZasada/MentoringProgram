@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+    nginx:
+        image: vitaliyvar/ubnt2004:nginx
+        ports:
+            - '8080:8080'
+        volumes:
+            - ./nginx:/etc/nginx/conf.d
+            - ./logs/nginx:/var/log/nginx
+        restart: always
+        networks:
+          static-network:
+            ipv4_address: 172.20.0.2
+
+    mysql:
+        image: vitaliyvar/ubnt2004:mysql
+        ports:
+          - '3306:3306'
+        volumes:
+          - ./wp-db-data:/var/lib/mysql
+        restart: always
+        networks:
+          static-network:
+            ipv4_address: 172.20.0.3
+
+    wordpress:
+        image: vitaliyvar/ubnt2004:wordpress
+        ports:
+          - '9000:9000'
+        volumes:
+          - ./wordpress:/var/www/html
+        depends_on:
+          - mysql  
+        networks:
+          static-network:
+            ipv4_address: 172.20.0.4
+volumes:
+  nginx:
+  wp-db-data:
+  wordpress:
+  logs:
+
+networks:
+  static-network:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

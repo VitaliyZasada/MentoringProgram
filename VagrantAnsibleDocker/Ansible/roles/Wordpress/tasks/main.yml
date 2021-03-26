@@ -1,0 +1,79 @@
+####################################################
+# Configure apache2 and wordpress
+####################################################
+# Include Ansible vars
+    - name: include vars
+      include_vars: "vars/default.yml"
+
+# Configure apache 2     
+    - name: Copy Apache config
+      template:
+        src: "files/apache.conf.j2"
+        dest: "/etc/apache2/sites-available/{{ apache_http_conf }}"
+
+    - name: Delete default ports.conf
+      file:
+        path: /etc/apache2/ports.conf
+        state: absent
+
+    - name: Copy new ports.conf
+      template:
+        src: "files/apache_ports.conf.j2"
+        dest: "/etc/apache2/ports.conf"
+
+# Configure wordpress     
+    - name: Recursively remove project directory
+      file:
+        path: "/var/www/{{ wordpress_project_directory }}/"
+        state: absent
+
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: "/var/www/{{ wordpress_project_directory }}/"
+        state: directory
+        mode: '0755'
+
+    - name: Download and Extract WordPress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: "/var/www/{{ wordpress_project_directory }}/"
+        remote_src: yes
+
+    - name: Move downloaded file to the project directory 
+      shell: "mv /var/www/{{ wordpress_project_directory }}/wordpress/* /var/www/{{ wordpress_project_directory }}/"
+
+    - name: Recursively remove directory
+      file:
+        path: "/var/www/{{ wordpress_project_directory }}/wordpress/"
+        state: absent
+
+    - name: Set up wp-config
+      template:
+        src: "files/wp-config.php.j2"
+        dest: "/var/www/{{ wordpress_project_directory }}/wp-config.php"
+
+    - name: Update directory ownership to Apache user
+      file:
+        path: "/var/www/{{ wordpress_project_directory }}"
+        state: directory
+        recurse: yes
+        owner: www-data
+        group: www-data
+
+    - name: Update ownership to Apache user
+      file:
+        path: "/var/www/{{ wordpress_project_directory }}/"
+        recurse: yes
+        owner: www-data
+        group: www-data
+
+    - name: Delete default page of the apache
+      file:
+        path: "/var/www/{{ wordpress_project_directory }}/index.html"
+        state: absent
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
+

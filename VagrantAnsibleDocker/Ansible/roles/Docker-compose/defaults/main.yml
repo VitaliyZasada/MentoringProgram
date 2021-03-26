@@ -1,0 +1,8 @@
+---
+system_user: vagrant
+system_user_wordpress: www-data
+system_user_mysql: root
+compose_project_dir: /{{ system_user }}/compose-wordpress
+
+# If you want to specify all variables without interactive prompts, can you
+# do so by using: --extra-vars

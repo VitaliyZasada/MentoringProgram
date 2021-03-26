@@ -1,0 +1,19 @@
+[host]
+localhost ansible_connection=local
+
+[machine_nginx]
+172.20.0.2
+
+[machine_mariadb]
+172.20.0.3
+
+[machine_wordpress]
+172.20.0.4
+
+[all:vars]
+ansible_connection=ssh 
+ansible_ssh_user=vagrant
+ansible_ssh_pass=vagrant
+ansible_python_interpreter=/usr/bin/python3
+HOST_KEY_CHECKING=False
+DEFAULT_ASK_PASS=False

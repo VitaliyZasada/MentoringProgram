@@ -1,0 +1,6 @@
+---
+system_user: vagrant
+compose_project_dir: /home/{{ system_user }}/docker-compose-update
+
+# If you want to specify all variables without interactive prompts, can you
+# do so by using: --extra-vars

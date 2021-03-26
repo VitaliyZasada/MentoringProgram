@@ -1,0 +1,62 @@
+---
+# setup compose dir structure
+
+- name: Run docker-commit1
+  command: docker container commit -p=false app_wordpress_1 vitaliyvar/ubnt2004:wordpress
+  tags:
+    - compose_commit
+
+- name: Run docker-commit2
+  command: docker container commit -p=false app_nginx_1 vitaliyvar/ubnt2004:nginx
+  tags:
+    - compose_commit3
+
+- name: Run docker-commit3
+  command: docker container commit -p=false app_mysql_1 vitaliyvar/ubnt2004:mysql
+  tags:
+    - compose_commit
+
+- name: Run docker-compose down
+  command: docker-compose -p app down
+  args:
+    chdir: "."
+  tags:
+    - compose_run
+
+- name: setup compose dir structure
+  become: yes
+  file:
+    path: "{{ compose_project_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ system_user }}"
+    group: "{{ system_user }}"
+    recurse: yes
+    mode: 0765
+  with_items:
+  - wordpress
+  - wp-db-data
+  - nginx
+  - logs/nginx
+  tags:
+    - dir_ops
+
+- name: deploy Docker Compose project for (Wordpress/MariaDB/Nginx containers)
+  template:
+    src: docker-compose.j2
+    dest: "{{ compose_project_dir }}/docker-compose-updated.yml"
+    owner: "{{ system_user }}"
+    group: "{{ system_user }}"
+    mode: 0664
+  tags:
+    - deploy_compose
+
+- name: Run docker-compose up
+  command: docker-compose -p app -f docker-compose-updated.yml up -d
+  args:
+    chdir: "{{ compose_project_dir }}"
+  tags:
+    - compose_run
+
+- name: giving some time for project (all 3 containers) to start-up
+  pause:
+    seconds: 10

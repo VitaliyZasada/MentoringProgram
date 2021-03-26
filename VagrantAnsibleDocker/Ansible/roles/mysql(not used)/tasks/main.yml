@@ -1,0 +1,87 @@
+---
+  - name: update apt cache
+    apt: 
+      update_cache: yes
+
+  - name: install MySQL Common
+    apt:
+      name: libaio
+      state: present
+
+  - name: install MySQL Common
+    apt:
+      name: libaio1
+      state: present
+
+  - name: install MySQL Server
+    apt:
+      name: mysql-server
+      state: present
+
+  - name: install MySQL Client
+    apt:
+      name: mysql-client
+      state: present
+
+  - name: install MySQL Common
+    apt:
+      name: mysql-common
+      state: present
+
+  - name: Install MySQL Python 
+    apt:
+      name: python3-mysqldb
+      state: present
+ 
+  # - name: ensure MySQL always starts
+  #   service:
+  #     name: mysql
+  #     state: started
+  #     enabled: yes
+
+  - name: START MYSQL
+    shell: "service mysql start"
+
+  - name: check if root my.conf exists
+    stat:
+      path: "/root/.my.cnf"
+    register: my_cnf_status
+
+  - name: Place ~/.my.cnf
+    template:
+     src: "files/.my.cnf.j2"
+     dest: "/root/.my.cnf"
+
+  - name: make MySQL changes for Ubuntu
+    block:
+
+      - name: Allow remote connections
+        lineinfile:
+          path: /etc/mysql/mysql.conf.d/mysqld.cnf
+          regexp: "^bind-address"
+          line: "bind-address = 0.0.0.0"
+        notify: restart-mysql
+
+      - name: set root password Ubuntu
+        mysql_user:
+          name: root
+          host_all: yes
+          password: "{{ mysql_root_password }}"
+          update_password: always
+          check_implicit_admin: yes
+          login_unix_socket: '/var/run/mysqld/mysqld.sock'
+          state: present
+          host: '%'
+
+  - name: create WordPress Database
+    mysql_db:
+      name: "{{ mariadb_name }}"
+      state: present
+
+  - name: Grant all previliges
+    mysql_user:
+      name: "{{ mariadb_user }}"
+      password: "{{ mariadb_password }}"
+      priv: '*.*:ALL'
+      host: "{{ wordpress_server_ip }}" 
+      state: present

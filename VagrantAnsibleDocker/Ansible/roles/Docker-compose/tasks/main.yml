@@ -1,0 +1,66 @@
+---
+# setup compose dir structure
+
+# - name: setup compose dir structure for nginx
+#   become: yes
+#   file:
+#     path: "{{ compose_project_dir }}/{{ item }}"
+#     state: directory
+#     owner: "{{ system_user }}"
+#     group: "{{ system_user }}"
+#     recurse: yes
+#     mode: 0777
+#   with_items:
+#   - nginx
+#   - logs/nginx
+#   tags:
+#     - dir_ops
+
+# - name: setup compose dir structure for wordpress
+#   become: yes
+#   file:
+#     path: "{{ compose_project_dir }}/{{ item }}"
+#     state: directory
+#     owner: "{{ system_user_wordpress }}"
+#     group: "{{ system_user_wordpress }}"
+#     recurse: yes
+#     mode: 0777
+#   with_items:
+#   - wordpress
+#   tags:
+#     - dir_ops
+
+# - name: setup compose dir structure for mysql
+#   become: yes
+#   file:
+#     path: "{{ compose_project_dir }}/{{ item }}"
+#     state: directory
+#     owner: "{{ system_user_mysql }}"
+#     group: "{{ system_user_mysql}}"
+#     recurse: yes
+#     mode: 0777
+#   with_items:
+#   - wp-db-data
+#   tags:
+#     - dir_ops
+
+- name: deploy Docker Compose project for (Wordpress/MariaDB/Nginx containers)
+  template:
+    src: docker-compose.j2
+    dest: "./docker-compose.yml"
+    owner: "{{ system_user }}"
+    group: "{{ system_user }}"
+    mode: 0664
+  tags:
+    - deploy_compose
+
+- name: Run docker-compose up
+  command: docker-compose -p app -f docker-compose.yml up -d
+  args:
+    chdir: "./"
+  tags:
+    - compose_run
+
+- name: giving some time for project (all 3 containers) to start-up
+  pause:
+    seconds: 10

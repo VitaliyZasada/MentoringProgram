@@ -1,0 +1,51 @@
+####################################################
+# Role installing apache2 , php , mariadb
+####################################################
+
+    - name: Update cache
+      become: yes
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+    - name: Upgrade all packages
+      become: yes
+      apt: upgrade=dist force_apt_get=yes
+
+    - name: Install apache2
+      become: yes
+      package: name=apache2 state=latest
+
+    - name: Install php
+      become: yes
+      package: name=php state=latest
+
+    - name: Install php-cli
+      become: yes
+      package: name=php-cli state=latest
+
+    - name: Install php-gd
+      become: yes
+      package: name=php-gd state=latest
+
+    - name: Install php-common
+      become: yes
+      package: name=php-common state=latest
+
+    - name: Install php-mysql
+      become: yes
+      package: name=php-mysql state=latest
+
+    - name: Install php zip
+      become: yes
+      package: name=php-zip state=latest
+
+    - name: Install php-curl
+      become: yes
+      package: name=php-curl state=latest
+      
+    - name: Install mariadb-client
+      become: yes
+      package: name=mariadb-client state=latest
+
+
+
+

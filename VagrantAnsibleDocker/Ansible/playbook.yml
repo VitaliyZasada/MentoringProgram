@@ -1,0 +1,46 @@
+---
+- hosts: host
+  become: yes
+  serial: 1
+  roles:
+    - role: Docker
+      vars:
+        docker_users:
+          - vagrant
+          - ubuntu
+        docker_daemon_options:
+          debug: false
+          live-restore: true
+    - role: Docker-compose
+
+- hosts: machine_nginx
+  become: yes
+  serial: 1
+  vars_files:
+    - vars/default.yml
+  roles:
+    - role: Nginx  
+
+- hosts: machine_mariadb
+  become: yes
+  serial: 1
+  vars_files:
+    - vars/default.yml
+  gather_facts: yes
+  roles:
+    - role: Maria-db
+
+- hosts: machine_wordpress
+  become: yes
+  serial: 1
+  vars_files:
+    - vars/default.yml
+  roles:
+    - role: Apache2-Php
+    - role: Wordpress
+
+# - hosts: host
+#   become: yes
+#   serial: 1
+#   roles:
+#     - role: Docker-compose-update

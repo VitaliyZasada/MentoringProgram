@@ -1,0 +1,21 @@
+####################################################
+# DATABASE docker container PARAMETERS 
+####################################################
+mariadb_name     : wordpress
+mariadb_user     : admin
+mariadb_password : admin12345
+mariadb_server_ip: 172.20.0.3
+mysql_root_password: "98_Av&%Ac54"
+####################################################
+# Apache2\Wordpress docker container PARAMETERS
+####################################################
+apache_http_host           : wordpress.com
+apache_http_conf           : 000-default.conf
+apache_http_port           : 9000
+wordpress_project_directory: html
+wordpress_server_ip        : 172.20.0.4
+####################################################
+# NGINX PROXY docker container PARAMETERS
+####################################################
+nginx_server_name: 192.168.88.120
+nginx_listen_port: 8080

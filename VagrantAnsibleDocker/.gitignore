@@ -1,0 +1,7 @@
+.vagrant
+.ansible
+.cashe
+.git
+Ansible/logs
+Ansible/nginx
+Ansible/docker-compose.yml

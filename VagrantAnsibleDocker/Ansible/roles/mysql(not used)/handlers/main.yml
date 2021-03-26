@@ -1,0 +1,9 @@
+---
+- name: restart-mysql
+  become: yes
+  shell: "service mysql restart"
+
+
+
+
+
